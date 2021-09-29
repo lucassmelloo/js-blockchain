@@ -6,17 +6,18 @@ class Block{
         this.blockIndex = blockIndex;
         this.blockCreationDate = blockCreationDate;
         this.blockInformation = blockInformation;
-        this.blockPreviousHash = '';
+        this.blockPreviousHash = blockPreviousHash;
+        this.blockCurrentHash = this.calculateHash();
     }
 
     calculateHash(){
-        return SHA256(this.blockIndex + this.blockPreviousHash + this.blockCreationDate + JSON.stringify(this.blockInformation).toString())
+        return SHA256(this.blockIndex + this.blockPreviousHash + this.blockCreationDate + JSON.stringify(this.blockInformation)).toString();
     }
 }
 
 class Blockchain{
     constructor(){
-        this.chain = [];
+        this.chain = [this.createGenesisBlock()];
     }
 
     createGenesisBlock(){
@@ -28,11 +29,21 @@ class Blockchain{
     }
 
     addBlock(newBlock){
-        newBlock.blockPreviousHash = this.getLatestBlock().hash;
-        newBlock.hash = newBlock.calculateHash();
+        newBlock.blockPreviousHash = this.getLatestBlock().blockCurrentHash;
+        newBlock.blockCurrentHash = newBlock.calculateHash();
         this.chain.push(newBlock);
+    }
+
+    isChainValid(){
+        for(let i = 1; i < this.chain.length; i++){
+            const blockCurrentBlock = this.chain[i];
+            const previusBlock = this.chain[i-1];
+        }
     }
 }
 
 let melloCoin = new Blockchain();
-melloCoin.addBlock
+melloCoin.addBlock(new Block(1, '28/09/2021', { amount: 4}));
+melloCoin.addBlock(new Block(2, '29/09/2021', { amount: 10}));
+
+console.log(JSON.stringify(melloCoin, null, 4));
