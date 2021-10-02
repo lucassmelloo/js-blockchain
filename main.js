@@ -1,6 +1,5 @@
 const SHA256 = require('crypto-js/sha256')
 
-
 class Block{
     constructor(indexOfBlock, creationDate, informationInBlock, previusHash = ''){
         this.indexOfBlock = indexOfBlock;
@@ -8,16 +7,27 @@ class Block{
         this.informationInBlock = informationInBlock;
         this.previusHash = previusHash;
         this.currentHash = this.calculateHash();
+        this.nonceDificult = 0;
     }
 
     calculateHash(){
-        return SHA256(this.indexOfBlock + this.previusHash + this.creationDate + JSON.stringify(this.informationInBlock)).toString();
+        return SHA256(this.indexOfBlock + this.previusHash + this.creationDate + JSON.stringify(this.informationInBlock) + this.nonceDificult).toString();
+    }
+
+    mineBlock(difficult){
+        while(this.currentHash.substring(0, difficult) !== Array(difficult + 1).join("0")){
+            this.nonceDificult++;
+            this.currentHash = this.calculateHash();
+        }
+
+        console.log("Block mined: " + this.currentHash);
     }
 }
 
 class Blockchain{
     constructor(){
         this.chain = [this.createGenesisBlock()];
+        this.difficulty = 4;
     }
 
     createGenesisBlock(){
@@ -30,7 +40,7 @@ class Blockchain{
 
     addBlock(newBlock){
         newBlock.previusHash = this.getLatestBlock().currentHash;
-        newBlock.currentHash = newBlock.calculateHash();
+        newBlock.mineBlock(this.difficulty);
         this.chain.push(newBlock);
     }
 
@@ -52,13 +62,10 @@ class Blockchain{
 }
 
 let melloCoin = new Blockchain();
+
+console.log('Mining block 1...')
 melloCoin.addBlock(new Block(1, '28/09/2021', { amount: 4}));
+
+console.log('Mining block 2...')
 melloCoin.addBlock(new Block(2, '29/09/2021', { amount: 10}));
 
-console.log("Essa Cadeia de Blocos é valida? " + melloCoin.isChainValid());
-/* console.log(JSON.stringify(melloCoin, null, 4)) */
-melloCoin.chain[1].informationInBlock = { amount: 20};
-melloCoin.chain[1].currentHash = melloCoin.chain[1].calculateHash();
-
-console.log("Essa Cadeia de Blocos é valida? " + melloCoin.isChainValid());
-/* console.log(JSON.stringify(melloCoin, null, 4)) */
